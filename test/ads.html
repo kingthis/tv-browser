@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ad blocker test</title>
+<script src="../browser.js"></script>
+<!-- Parser-inserted ad script: must not run. -->
+<script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<style>body { font: 20px system-ui; margin: 40px; } .box { height: 900px; border: 1px solid #ccc; margin: 20px 0; padding: 20px; }</style>
+</head>
+<body>
+<h1>Ad blocker test</h1>
+<ins class="adsbygoogle" id="cosmetic" style="display:block;width:300px;height:250px;background:red">AD SLOT</ins>
+<div class="ad-banner" id="banner" style="background:red;height:60px">BANNER</div>
+<a id="real" href="#clicked">A normal link</a>
+<a id="adlink" href="https://www.doubleclick.net/click">An ad link</a>
+<div class="box">Tall content so the pointer can scroll.</div>
+<pre id="log"></pre>
+<script>
+  var results = {};
+  // Dynamic ad script and frame insertion.
+  var s = document.createElement('script'); s.src = 'https://www.googletagservices.com/tag/js/gpt.js'; document.head.appendChild(s);
+  results.dynamicScriptSrc = s.getAttribute('src');
+  var f = document.createElement('iframe'); f.src = 'https://ad.doubleclick.net/ddm/adi/x'; document.body.appendChild(f);
+  results.dynamicIframeInDom = document.body.contains(f) && !!f.getAttribute('src');
+  // Pop-up.
+  var w = window.open('https://popads.net/x');
+  results.popupClosed = w && w.closed === true;
+  // Network.
+  fetch('https://securepubads.g.doubleclick.net/x').then(function () { results.fetch = 'allowed'; }, function () { results.fetch = 'blocked'; });
+  // Normal resources must still work.
+  var ok = document.createElement('div'); ok.id = 'normal'; document.body.appendChild(ok);
+  results.normalAppend = document.body.contains(ok);
+  setTimeout(function () {
+    results.cosmeticHidden = getComputedStyle(document.getElementById('cosmetic')).display === 'none';
+    results.bannerHidden = getComputedStyle(document.getElementById('banner')).display === 'none';
+    results.adsbygoogleLoaded = !!window.adsbygoogle && !!window.adsbygoogle.loaded;
+    results.blockedCount = window.tvBrowser ? window.tvBrowser.blocked() : -1;
+    document.getElementById('log').textContent = JSON.stringify(results, null, 2);
+    window.__results = results;
+  }, 1500);
+</script>
+</body>
+</html>

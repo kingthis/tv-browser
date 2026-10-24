@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TV Browser</title>
+<style>
+  :root { --bg: #0f1115; --panel: #1a1d24; --text: #f2f3f5; --muted: #9aa0aa; --accent: #1a73e8; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 500 24px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  main { max-width: 1400px; margin: 0 auto; padding: 96px 64px; }
+  h1 { margin: 0 0 8px; font-size: 56px; font-weight: 700; letter-spacing: -0.02em; }
+  p.sub { margin: 0 0 40px; color: var(--muted); }
+  form { display: flex; margin-bottom: 56px; }
+  #address { flex: 1; min-width: 0; padding: 22px 28px; font: inherit; font-size: 30px; border-radius: 18px; border: 3px solid var(--accent); background: #fff; color: #111; outline: none; }
+  #go { margin-left: 16px; padding: 0 40px; font: inherit; font-size: 28px; border: 0; border-radius: 18px; background: var(--accent); color: #fff; }
+  h2 { margin: 0 0 20px; font-size: 26px; color: var(--muted); font-weight: 600; }
+  #tiles { display: flex; flex-wrap: wrap; margin: -10px; }
+  .tile { position: relative; width: 240px; height: 140px; margin: 10px; border-radius: 18px; background: var(--panel); color: var(--text); text-decoration: none; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 12px; }
+  .tile b { font-size: 28px; }
+  .tile small { color: var(--muted); font-size: 18px; word-break: break-all; }
+  .tile .remove { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(255,255,255,.08); color: var(--muted); font: inherit; font-size: 22px; line-height: 36px; padding: 0; }
+  .tile.add { background: transparent; border: 2px dashed #3a3f4a; color: var(--muted); font: inherit; }
+  footer { margin-top: 64px; color: var(--muted); font-size: 20px; }
+  footer kbd { display: inline-block; padding: 2px 10px; border-radius: 8px; background: var(--panel); color: var(--text); font: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>TV Browser</h1>
+  <p class="sub">Type any website. Ads, pop-ups and trackers are blocked.</p>
+  <form id="bar" autocomplete="off">
+    <input id="address" type="url" placeholder="Type a website or search" aria-label="Website or search">
+    <button id="go" type="submit">Go</button>
+  </form>
+  <h2>Shortcuts</h2>
+  <div id="tiles"></div>
+  <footer>
+    <kbd>Arrows</kbd> move the pointer &nbsp; <kbd>OK</kbd> click &nbsp; <kbd>Back</kbd> go back &nbsp;
+    <kbd>CH ▲</kbd> address bar &nbsp; <kbd>CH ▼</kbd> this page &nbsp; <kbd>▶❚❚</kbd> play / pause
+  </footer>
+</main>
+<script src="browser.js"></script>
+<script>
+(function () {
+  'use strict';
+  var KEY = 'tv-browser.shortcuts.v1';
+  var DEFAULTS = [
+    { name: 'YouTube', url: 'https://www.youtube.com/' },
+    { name: 'Google', url: 'https://www.google.com/' },
+    { name: 'Wikipedia', url: 'https://en.wikipedia.org/' },
+    { name: 'Reddit', url: 'https://www.reddit.com/' }
+  ];
+  function load() {
+    try { var saved = JSON.parse(localStorage.getItem(KEY)); if (saved && saved.length >= 0 && saved.push) return saved; } catch (e) {}
+    return DEFAULTS.slice();
+  }
+  function save(list) { try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {} }
+  var list = load();
+  var tiles = document.getElementById('tiles');
+  var address = document.getElementById('address');
+
+  function hostLabel(url) { try { return new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return url; } }
+
+  function render() {
+    tiles.innerHTML = '';
+    list.forEach(function (item, i) {
+      var a = document.createElement('a');
+      a.className = 'tile'; a.href = item.url;
+      var b = document.createElement('b'); b.textContent = item.name; a.appendChild(b);
+      var s = document.createElement('small'); s.textContent = hostLabel(item.url); a.appendChild(s);
+      var x = document.createElement('button');
+      x.className = 'remove'; x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Remove ' + item.name);
+      x.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); list.splice(i, 1); save(list); render(); });
+      a.appendChild(x);
+      tiles.appendChild(a);
+    });
+    var add = document.createElement('button');
+    add.className = 'tile add'; add.type = 'button';
+    add.textContent = '+ Add the address above';
+    add.addEventListener('click', function () {
+      var url = address.value.trim();
+      if (!url) { address.focus(); return; }
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      list.push({ name: hostLabel(url), url: url }); save(list); address.value = ''; render();
+    });
+    tiles.appendChild(add);
+  }
+
+  document.getElementById('bar').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (window.tvBrowser) window.tvBrowser.go(address.value);
+  });
+  render();
+})();
+</script>
+</body>
+</html>
