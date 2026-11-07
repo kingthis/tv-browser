@@ -1,12 +1,12 @@
 {
   "name": "tv-browser",
   "appName": "TV Browser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Open any website on a Samsung TV with a remote-controlled pointer, an address bar and a basic ad blocker.",
   "packageType": "mods",
   "websiteURL": "https://fz-labz.github.io/tv-browser/",
   "main": "browser.js",
-  "evaluateScriptOnDocumentStart": true,
+  "evaluateScriptOnDocumentStart": false,
   "keys": [
     "ChannelUp",
     "ChannelDown",
