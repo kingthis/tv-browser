@@ -226,7 +226,7 @@
     ui.toast = el('div', 'position:absolute;left:50%;bottom:48px;transform:translateX(-50%);padding:12px 22px;border-radius:999px;background:rgba(20,20,24,.9);color:#fff;font-size:20px;opacity:0;transition:opacity .3s;', root);
     document.body.appendChild(root);
     ui.input.addEventListener('keydown', function (e) {
-      if (e.keyCode === KEY.OK) { e.preventDefault(); go(ui.input.value); }
+      if (e.keyCode === KEY.OK || e.keyCode === 229) { e.preventDefault(); go(ui.input.value); }
     });
     pointer.x = innerWidth / 2; pointer.y = innerHeight / 2;
     drawPointer();
