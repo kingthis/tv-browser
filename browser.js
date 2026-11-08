@@ -226,7 +226,7 @@
     ui.toast = el('div', 'position:absolute;left:50%;bottom:48px;transform:translateX(-50%);padding:12px 22px;border-radius:999px;background:rgba(20,20,24,.9);color:#fff;font-size:20px;opacity:0;transition:opacity .3s;', root);
     document.body.appendChild(root);
     ui.input.addEventListener('keydown', function (e) {
-      if (e.keyCode === KEY.OK || e.keyCode === 229) { e.preventDefault(); go(ui.input.value); }
+      if (e.keyCode === KEY.OK || e.keyCode === 229) { submitSoon(); }
     });
     pointer.x = innerWidth / 2; pointer.y = innerHeight / 2;
     drawPointer();
@@ -246,6 +246,15 @@
     if (/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) return text;
     if (/^[^\s]+\.[a-z]{2,}(\/.*)?$/i.test(text) || /^localhost(:\d+)?/.test(text)) return 'https://' + text;
     return SEARCH + encodeURIComponent(text);
+  }
+
+  var subT = null;
+  function submitSoon() {
+    clearTimeout(subT);
+    subT = setTimeout(function () {
+      var v = ui.input && ui.input.value ? ui.input.value.trim() : '';
+      if (v) go(v);
+    }, 500);
   }
 
   function go(text) {
@@ -378,7 +387,7 @@
     if (barOpen() || editing()) {
       // Up/down leave a text box; left/right stay with the caret.
       if (k === KEY.UP || k === KEY.DOWN) { if (barOpen()) return; document.activeElement.blur(); }
-      else if (k === 229 && barOpen()) { e.preventDefault(); e.stopImmediatePropagation(); go(ui.input.value); return; }
+      else if ((k === 229 || k === KEY.OK) && barOpen()) { submitSoon(); return; }
       else return;
     }
     var dx = 0, dy = 0;
