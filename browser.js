@@ -378,6 +378,7 @@
     if (barOpen() || editing()) {
       // Up/down leave a text box; left/right stay with the caret.
       if (k === KEY.UP || k === KEY.DOWN) { if (barOpen()) return; document.activeElement.blur(); }
+      else if (k === 229 && barOpen()) { e.preventDefault(); e.stopImmediatePropagation(); go(ui.input.value); return; }
       else return;
     }
     var dx = 0, dy = 0;
